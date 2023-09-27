@@ -238,7 +238,6 @@ int playSweep(int grid[][columns])
 {
 
 }
-
 bool boom()
 {
 
