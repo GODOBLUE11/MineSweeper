@@ -1,0 +1,2 @@
+# MineSweeper
+Minesweeper terminal game
