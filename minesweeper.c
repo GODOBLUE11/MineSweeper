@@ -8,15 +8,15 @@ const int rows = 10;
 const int columns = 8;
 const int mines = 10;
 
-void placeMines();
-void fillGrid();
-void printGrid();
+void placeMines(int grid[][columns], int rowGuess, int columnGuess);
+void fillGrid(int grid[][columns]);
+void printGrid(int grid[][columns]);
 //int playSweep();
 //bool boom();
 //void firstSweep();
-void updateGrid();
-void revealGrid();
-bool inBounds();
+void updateGrid(int grid[][columns], bool gridVis[][columns], int rowGuess, int columnGuess);
+void revealGrid(int grid[][columns], bool gridVis[][columns]);
+bool inBounds(int i, int j);
 
 int main()
 {
