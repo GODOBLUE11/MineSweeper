@@ -149,7 +149,7 @@ void printGrid(int grid[][columns])
 //     }
 // }
 
-void updateGrid(int grid[][columns], int gridVis[][columns], int rowGuess, int columnGuess)
+void updateGrid(int grid[][columns], bool gridVis[][columns], int rowGuess, int columnGuess)
 {
     if (grid[rowGuess][columnGuess] == -1)
     {
@@ -209,7 +209,7 @@ void updateGrid(int grid[][columns], int gridVis[][columns], int rowGuess, int c
     }
 }
 
-void revealGrid(int grid[][columns], int gridVis[][columns])
+void revealGrid(int grid[][columns], bool gridVis[][columns])
 {
     for (int i = 0; i < rows; i++)
     {
