@@ -11,12 +11,12 @@ const int mines = 10;
 void placeMines(int grid[][columns], int rowGuess, int columnGuess);
 void fillGrid(int grid[][columns]);
 void printGrid(int grid[][columns]);
-//int playSweep();
-//bool boom();
-//void firstSweep();
-void updateGrid(int grid[][columns], bool gridVis[][columns], int rowGuess, int columnGuess);
-void revealGrid(int grid[][columns], bool gridVis[][columns]);
+void playSweep(int gridVis[][columns],int grid[][columns], char guessType, int rowGuess, int columnGuess);
+bool boom(int grid[][columns], int gridVis[][columns]);
+void updateGrid(int grid[][columns], int gridVis[][columns], int rowGuess, int columnGuess);
+void revealGrid(int grid[][columns], int gridVis[][columns]);
 bool inBounds(int i, int j);
+bool gridFilled(int gridVis[][columns]);
 
 int main()
 {
@@ -27,8 +27,8 @@ int main()
     srand(*(unsigned int *)buf);
 
 
-    int rowGuess;
-    int columnGuess;
+    int firstRowGuess;
+    int firstColumnGuess;
 
     int grid[rows][columns];
     for (int i = 0; i < rows; i++) {
@@ -36,28 +36,57 @@ int main()
             grid[i][j] = 0;
         }
     }
-    bool gridVis[rows][columns];
+    int gridVis[rows][columns];
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < columns; j++) {
-            gridVis[i][j] = false;
+            gridVis[i][j] = 0;
         }
     }
     
     printf("Guess (row column): ");
-    scanf("%d %d", &rowGuess, &columnGuess);
+    scanf("%d %d", &firstRowGuess, &firstColumnGuess);
     int c;
     while((c = getchar()) != '\n' && c != EOF) continue;
 
-    placeMines(grid, rowGuess, columnGuess);
+    placeMines(grid, firstRowGuess, firstColumnGuess);
 
     fillGrid(grid);
-    printGrid(grid);
-
-    printf("\n\n");
-    updateGrid(grid, gridVis, rowGuess, columnGuess);
+    updateGrid(grid, gridVis, firstRowGuess, firstColumnGuess);
     revealGrid(grid, gridVis);
 
-    //while(!boom())
+    while (!boom(grid, gridVis) && !gridFilled(gridVis))
+    {
+        char guessType;
+        int rowGuess;
+        int columnGuess;
+
+        printf("Dig or Flag? (d or f): ");
+        scanf("%c", &guessType);
+
+        printf("Guess (row column): ");
+        scanf("%d %d", &rowGuess, &columnGuess);
+        printf("\n\n");
+
+        if (gridVis[rowGuess][columnGuess] == 1)
+        {
+            getchar();
+        }
+        else
+        {
+            getchar();
+            playSweep(gridVis, grid, guessType, rowGuess, columnGuess);
+            revealGrid(grid, gridVis);
+        }
+    }
+    
+    if (boom(grid, gridVis))
+    {
+        printf("BOOM!\nYou Lost! Try again!\n");
+    }
+    else if (gridFilled(gridVis))
+    {
+        puts("You Won! Great Job!");
+    }
 }
 
 void placeMines(int grid[][columns], int rowGuess, int columnGuess)
@@ -121,103 +150,76 @@ void printGrid(int grid[][columns])
     }
 }
 
-// void firstSweep(int grid[][columns], int rowGuess, int columnGuess)
-// {
-//     int tempGrid[rows][columns];
+void updateGrid(int grid[][columns], int gridVis[][columns], int rowGuess, int columnGuess)
+{    
+    gridVis[rowGuess][columnGuess] = 1;
 
-//     for (int i = 0; i < rows; i++)
-//     {
-//         for (int j = 0; j < columns; j++)
-//         {
-//             tempGrid[i][j] = grid[i][j];
-//         }
-//     }
-//     for (int i = 0; i < rows; i++)
-//     {
-//         for (int j = 0; j < columns; j++)
-//         {
-//             int tempX = rowGuess + i;
-//             int tempY = columnGuess + j;
-
-//             if (tempX > rows)
-//                 tempX -= rows;
-//             if (tempY > columns)
-//                 tempY -= columns;
-
-//             grid[tempX][tempY] = tempGrid[i][j];
-//         }
-//     }
-// }
-
-void updateGrid(int grid[][columns], bool gridVis[][columns], int rowGuess, int columnGuess)
-{
-    if (grid[rowGuess][columnGuess] == -1)
+    if (grid[rowGuess][columnGuess] == 0)
     {
-        gridVis[rowGuess][columnGuess] = false;
-        return;
-    }
-    else if (grid[rowGuess][columnGuess] == 0)
-    {
-        if (inBounds(rowGuess-1,columnGuess+1) && gridVis[rowGuess-1][columnGuess+1] == false)
+        if (inBounds(rowGuess-1,columnGuess+1) && gridVis[rowGuess-1][columnGuess+1] == 0)
         {
-            gridVis[rowGuess-1][columnGuess+1] = true;
+            gridVis[rowGuess-1][columnGuess+1] = 1;
             if (grid[rowGuess-1][columnGuess+1] == 0)
                 updateGrid(grid, gridVis, rowGuess - 1, columnGuess + 1);
         }
-        if (inBounds(rowGuess-1, columnGuess) && gridVis[rowGuess-1][columnGuess] == false)
+        if (inBounds(rowGuess-1, columnGuess) && gridVis[rowGuess-1][columnGuess] == 0)
         {
-            gridVis[rowGuess-1][columnGuess] = true;
+            gridVis[rowGuess-1][columnGuess] = 1;
             if (grid[rowGuess-1][columnGuess] == 0)
                 updateGrid(grid, gridVis, rowGuess - 1, columnGuess);
         }
-        if (inBounds(rowGuess-1, columnGuess-1) && gridVis[rowGuess-1][columnGuess-1] == false)
+        if (inBounds(rowGuess-1, columnGuess-1) && gridVis[rowGuess-1][columnGuess-1] == 0)
         {
-            gridVis[rowGuess-1][columnGuess-1] = true;
+            gridVis[rowGuess-1][columnGuess-1] = 1;
             if (grid[rowGuess-1][columnGuess-1] == 0)
             updateGrid(grid, gridVis, rowGuess - 1, columnGuess - 1);
         }
-        if (inBounds(rowGuess, columnGuess+1) && gridVis[rowGuess][columnGuess+1] == false)
+        if (inBounds(rowGuess, columnGuess+1) && gridVis[rowGuess][columnGuess+1] == 0)
         {
-            gridVis[rowGuess][columnGuess+1] = true;
+            gridVis[rowGuess][columnGuess+1] = 1;
             if (grid[rowGuess][columnGuess+1] == 0)
                 updateGrid(grid, gridVis, rowGuess, columnGuess + 1);
         }
-        if (inBounds(rowGuess, columnGuess-1) && gridVis[rowGuess][columnGuess-1] == false)
+        if (inBounds(rowGuess, columnGuess-1) && gridVis[rowGuess][columnGuess-1] == 0)
         {
-            gridVis[rowGuess][columnGuess-1] = true;
+            gridVis[rowGuess][columnGuess-1] = 1;
             if (grid[rowGuess][columnGuess-1] == 0)
                 updateGrid(grid, gridVis, rowGuess, columnGuess - 1);
         }
-        if (inBounds(rowGuess+1, columnGuess+1) && gridVis[rowGuess+1][columnGuess+1] == false)
+        if (inBounds(rowGuess+1, columnGuess+1) && gridVis[rowGuess+1][columnGuess+1] == 0)
         {
-            gridVis[rowGuess+1][columnGuess+1] = true;
+            gridVis[rowGuess+1][columnGuess+1] = 1;
             if (grid[rowGuess+1][columnGuess+1] == 0)
                 updateGrid(grid, gridVis, rowGuess + 1, columnGuess + 1);
         }
-        if (inBounds(rowGuess+1, columnGuess) && gridVis[rowGuess+1][columnGuess] == false)
+        if (inBounds(rowGuess+1, columnGuess) && gridVis[rowGuess+1][columnGuess] == 0)
         {
-            gridVis[rowGuess+1][columnGuess] = true;
+            gridVis[rowGuess+1][columnGuess] = 1;
             if (grid[rowGuess+1][columnGuess] == 0)
                 updateGrid(grid, gridVis, rowGuess + 1, columnGuess);
         }
-        if (inBounds(rowGuess+1, columnGuess-1) && gridVis[rowGuess+1][columnGuess-1] == false)
+        if (inBounds(rowGuess+1, columnGuess-1) && gridVis[rowGuess+1][columnGuess-1] == 0)
         {
-            gridVis[rowGuess+1][columnGuess-1] = true;
+            gridVis[rowGuess+1][columnGuess-1] = 1;
             if (grid[rowGuess+1][columnGuess-1] == 0)
                 updateGrid(grid, gridVis, rowGuess + 1, columnGuess - 1);
         }
     }
 }
 
-void revealGrid(int grid[][columns], bool gridVis[][columns])
+void revealGrid(int grid[][columns], int gridVis[][columns])
 {
     for (int i = 0; i < rows; i++)
     {
         for (int j = 0; j < columns; j++)
         {
-            if (gridVis[i][j] == true)
+            if (gridVis[i][j] == 1)
             {
                 printf("[%d] ", grid[i][j]);
+            }
+            else if (gridVis[i][j] == 2)
+            {
+                printf("[*] ");
             }
             else
             {
@@ -231,16 +233,50 @@ void revealGrid(int grid[][columns], bool gridVis[][columns])
 bool inBounds(int i, int j)
 {
     if (i >= 0 && i < rows && j >= 0 && j < columns)
+    {
         return true;
+    }
     return false;
 }
-/*
-int playSweep(int grid[][columns])
-{
 
-}
-bool boom()
+void playSweep(int gridVis[][columns], int grid[][columns], char guessType, int rowGuess, int columnGuess)
 {
-
+    if (guessType == 'd')
+    {
+        gridVis[rowGuess][columnGuess] = 1;
+        if (grid[rowGuess][columnGuess] == 0)
+        {
+            updateGrid(grid, gridVis, rowGuess, columnGuess);
+        }
+    }
+    else if (guessType == 'f')
+    {
+        gridVis[rowGuess][columnGuess] = 2;
+    }
 }
-*/
+
+bool boom(int grid[][columns], int gridVis[][columns])
+{
+    for(int i = 0; i < rows;i++)
+    {
+        for(int j = 0; j < columns; j++)
+        {
+            if (grid[i][j] == -1 && gridVis[i][j] == 1)
+                return true;
+        }
+    }
+    return false;
+}
+
+bool gridFilled(int gridVis[][columns])
+{
+    for(int i = 0; i < rows;i++)
+    {
+        for(int j = 0; j < columns; j++)
+        {
+            if (gridVis[i][j] == 0)
+                return false;
+        }
+    }
+    return true;
+}
