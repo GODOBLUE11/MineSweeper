@@ -26,7 +26,6 @@ int main()
     close(urandom);
     srand(*(unsigned int *)buf);
 
-
     int firstRowGuess;
     int firstColumnGuess;
 
@@ -43,6 +42,8 @@ int main()
         }
     }
     
+    revealGrid(grid, gridVis);
+    
     printf("Guess (row column): ");
     scanf("%d %d", &firstRowGuess, &firstColumnGuess);
     int c;
@@ -51,7 +52,7 @@ int main()
     placeMines(grid, firstRowGuess, firstColumnGuess);
 
     fillGrid(grid);
-    updateGrid(grid, gridVis, firstRowGuess, firstColumnGuess);
+    updateGrid(grid, gridVis, firstRowGuess - 1, firstColumnGuess - 1);
     revealGrid(grid, gridVis);
 
     while (!boom(grid, gridVis) && !gridFilled(gridVis))
@@ -67,14 +68,15 @@ int main()
         scanf("%d %d", &rowGuess, &columnGuess);
         printf("\n\n");
 
-        if (gridVis[rowGuess][columnGuess] == 1)
+        if (gridVis[rowGuess - 1][columnGuess - 1] == 1)
         {
+            revealGrid(grid, gridVis);
             getchar();
         }
         else
         {
             getchar();
-            playSweep(gridVis, grid, guessType, rowGuess, columnGuess);
+            playSweep(gridVis, grid, guessType, rowGuess - 1, columnGuess - 1);
             revealGrid(grid, gridVis);
         }
     }
@@ -209,8 +211,24 @@ void updateGrid(int grid[][columns], int gridVis[][columns], int rowGuess, int c
 
 void revealGrid(int grid[][columns], int gridVis[][columns])
 {
+    printf("  ");
+    for (int i = 0; i < columns; i++)
+    {
+        printf("   %i", i+1);
+    }
+    puts("");
+
     for (int i = 0; i < rows; i++)
     {
+        if (i < 9)
+        {
+            printf("%i   ", i+1);
+        }
+        else
+        {
+            printf("%i  ", i+1);
+        }
+
         for (int j = 0; j < columns; j++)
         {
             if (gridVis[i][j] == 1)
@@ -251,7 +269,14 @@ void playSweep(int gridVis[][columns], int grid[][columns], char guessType, int 
     }
     else if (guessType == 'f')
     {
-        gridVis[rowGuess][columnGuess] = 2;
+        if (gridVis[rowGuess][columnGuess] == 2)
+        {
+            gridVis[rowGuess][columnGuess] = 0;
+        }
+        else
+        {
+            gridVis[rowGuess][columnGuess] = 2;
+        }
     }
 }
 
