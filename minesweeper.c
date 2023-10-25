@@ -18,8 +18,9 @@ void revealGrid(int grid[][columns], int gridVis[][columns]);
 bool inBounds(int i, int j);
 bool gridFilled(int gridVis[][columns]);
 
+
 int main()
-{
+{   
     char buf[4];
     int urandom = open("/dev/urandom", O_RDONLY);
     read(urandom, buf, 4);
@@ -49,7 +50,7 @@ int main()
     int c;
     while((c = getchar()) != '\n' && c != EOF) continue;
 
-    placeMines(grid, firstRowGuess, firstColumnGuess);
+    placeMines(grid, firstRowGuess - 1, firstColumnGuess - 1);
 
     fillGrid(grid);
     updateGrid(grid, gridVis, firstRowGuess - 1, firstColumnGuess - 1);
