@@ -17,6 +17,7 @@ void updateGrid(int grid[][columns], int gridVis[][columns], int rowGuess, int c
 void revealGrid(int grid[][columns], int gridVis[][columns]);
 bool inBounds(int i, int j);
 bool gridFilled(int gridVis[][columns]);
+int minesLeft(int gridVis[][columns]);
 
 
 int main()
@@ -212,6 +213,7 @@ void updateGrid(int grid[][columns], int gridVis[][columns], int rowGuess, int c
 
 void revealGrid(int grid[][columns], int gridVis[][columns])
 {
+    printf("Mines Left: %i\n", minesLeft(gridVis));
     printf("  ");
     for (int i = 0; i < columns; i++)
     {
@@ -262,10 +264,17 @@ void playSweep(int gridVis[][columns], int grid[][columns], char guessType, int 
 {
     if (guessType == 'd')
     {
-        gridVis[rowGuess][columnGuess] = 1;
-        if (grid[rowGuess][columnGuess] == 0)
+        if (gridVis[rowGuess][columnGuess] == 2)
         {
-            updateGrid(grid, gridVis, rowGuess, columnGuess);
+            printf("Can't dig a flag!\n");
+        }
+        else
+        {
+            gridVis[rowGuess][columnGuess] = 1;
+            if (grid[rowGuess][columnGuess] == 0)
+            {
+                updateGrid(grid, gridVis, rowGuess, columnGuess);
+            }
         }
     }
     else if (guessType == 'f')
@@ -283,9 +292,9 @@ void playSweep(int gridVis[][columns], int grid[][columns], char guessType, int 
 
 bool boom(int grid[][columns], int gridVis[][columns])
 {
-    for(int i = 0; i < rows;i++)
+    for (int i = 0; i < rows;i++)
     {
-        for(int j = 0; j < columns; j++)
+        for (int j = 0; j < columns; j++)
         {
             if (grid[i][j] == -1 && gridVis[i][j] == 1)
                 return true;
@@ -296,13 +305,29 @@ bool boom(int grid[][columns], int gridVis[][columns])
 
 bool gridFilled(int gridVis[][columns])
 {
-    for(int i = 0; i < rows;i++)
+    for (int i = 0; i < rows;i++)
     {
-        for(int j = 0; j < columns; j++)
+        for (int j = 0; j < columns; j++)
         {
             if (gridVis[i][j] == 0)
                 return false;
         }
     }
     return true;
+}
+
+int minesLeft(int gridVis[][columns])
+{
+    int flagCount = 0;
+    for (int i = 0; i < rows; i++)
+    {
+        for (int j = 0; j < columns; j++)
+        {
+            if (gridVis[i][j] == 2)
+            {
+                flagCount++;
+            }
+        }
+    }
+    return mines - flagCount;
 }
